@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model NguoiDung {
+  nguoi_dung_id Int     @id @default(autoincrement())
+  email         String  @unique
+  mat_khau      String
+  ho_ten        String
+  tuoi          Int?
+  anh_dai_dien  String?
+
+  hinh_anh  HinhAnh[]
+  binh_luan BinhLuan[]
+  luu_anh   LuuAnh[]
+
+  @@map("nguoi_dung")
+}
+
+model HinhAnh {
+  hinh_id       Int     @id @default(autoincrement())
+  ten_hinh      String
+  duong_dan     String
+  mo_ta         String?
+  nguoi_dung_id Int
+
+  nguoi_dung NguoiDung @relation(fields: [nguoi_dung_id], references: [nguoi_dung_id], onDelete: Cascade)
+
+  binh_luan BinhLuan[]
+  luu_anh   LuuAnh[]
+
+  @@index([nguoi_dung_id])
+  @@map("hinh_anh")
+}
+
+model BinhLuan {
+  binh_luan_id   Int      @id @default(autoincrement())
+  nguoi_dung_id  Int
+  hinh_id        Int
+  ngay_binh_luan DateTime @db.Date
+  noi_dung       String
+
+  nguoi_dung NguoiDung @relation(fields: [nguoi_dung_id], references: [nguoi_dung_id], onDelete: Cascade)
+  hinh_anh   HinhAnh   @relation(fields: [hinh_id], references: [hinh_id], onDelete: Cascade)
+
+  @@index([nguoi_dung_id])
+  @@index([hinh_id])
+  @@map("binh_luan")
+}
+
+model LuuAnh {
+  nguoi_dung_id Int
+  hinh_id       Int
+  ngay_luu      DateTime @db.Date
+
+  nguoi_dung NguoiDung @relation(fields: [nguoi_dung_id], references: [nguoi_dung_id], onDelete: Cascade)
+  hinh_anh   HinhAnh   @relation(fields: [hinh_id], references: [hinh_id], onDelete: Cascade)
+
+  @@id([nguoi_dung_id, hinh_id])
+  @@index([hinh_id])
+  @@map("luu_anh")
+}
