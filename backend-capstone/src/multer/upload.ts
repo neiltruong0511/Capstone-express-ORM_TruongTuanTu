@@ -1,27 +1,35 @@
-import dotenv from "dotenv";
-dotenv.config(); 
-
 import multer from "multer";
-import { v2 as cloudinary } from "cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
+import path from "path";
+import fs from "fs";
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+const uploadDir = path.join(process.cwd(), "uploads");
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+    cb(null, filename);
+  },
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: "capstone_uploads",
-    allowed_formats: ["jpg", "jpeg", "png", "webp", "gif"],
-    public_id: (_req: any, _file: any) =>
-      `${Date.now()}-${Math.round(Math.random() * 1e9)}`,
-  } as any,
-});
+const fileFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Chỉ cho phép upload file hình ảnh"));
+  }
+};
 
 export const upload = multer({
   storage,
+  fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 },
 });
