@@ -17,7 +17,7 @@ import {
 } from "../controllers/comment.controller";
 
 import { authenticate } from "../common/middlewares/auth.middleware";
-import { upload } from "../multer/upload";
+import { upload } from "../multer/upload"; // Trỏ đúng về file multer Cloudinary bạn vừa sửa
 
 const router = Router();
 
@@ -37,7 +37,6 @@ router.get("/:id/saved", authenticate, checkSavedImage);
 router.post("/:id/save", authenticate, saveImage);
 router.delete("/:id/save", authenticate, unsaveImage);
 
-// Create image
 router.post("/", authenticate, upload.single("image"), createImage);
 
 // Delete image

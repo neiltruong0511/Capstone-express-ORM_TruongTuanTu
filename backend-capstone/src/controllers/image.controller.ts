@@ -120,15 +120,8 @@ export const createImage = async (
   next: NextFunction
 ) => {
   try {
-    const user = (
-      req as Request & {
-        user: {
-          nguoi_dung_id: number;
-        };
-      }
-    ).user;
-
-    const userId = Number(user.nguoi_dung_id);
+    const user = (req as any).user;
+    const userId = Number(user?.nguoi_dung_id);
 
     if (!req.file) {
       return res.status(400).json({
@@ -144,8 +137,8 @@ export const createImage = async (
       });
     }
 
-    // ✅ req.file.path tự động chứa URL HTTPS đầy đủ từ Cloudinary (https://res.cloudinary.com/...)
-    const imageUrl = req.file.path;
+    // ✅ Lấy trực tiếp HTTPS URL vĩnh viễn từ Cloudinary
+    const imageUrl = (req.file as any).path;
 
     const image = await imageService.createImage(userId, {
       ten_hinh,
@@ -153,7 +146,7 @@ export const createImage = async (
       duong_dan: imageUrl,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Thêm hình thành công",
       content: image,
     });
