@@ -144,13 +144,13 @@ export const createImage = async (
       });
     }
 
-    // ✅ CHỈ LƯU ĐƯỜNG DẪN TƯƠNG ĐỐI: Không gắn domain hay localhost vào DB nữa
-    const relativePath = `/uploads/${req.file.filename}`;
+    // ✅ req.file.path tự động chứa URL HTTPS đầy đủ từ Cloudinary (https://res.cloudinary.com/...)
+    const imageUrl = req.file.path;
 
     const image = await imageService.createImage(userId, {
       ten_hinh,
       mo_ta,
-      duong_dan: relativePath, // DB sẽ chỉ lưu dạng: /uploads/1789150842898.jpg
+      duong_dan: imageUrl,
     });
 
     res.status(201).json({

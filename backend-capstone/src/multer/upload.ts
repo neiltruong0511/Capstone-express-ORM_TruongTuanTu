@@ -1,55 +1,29 @@
 import multer from "multer";
-import path from "path";
-import fs from "fs";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
-// ✅ Dùng process.cwd() để ép đường dẫn luôn tuyệt đối về folder /uploads ở root project
-const uploadDir = path.join(process.cwd(), "uploads");
+// 1. Kết nối đến tài khoản Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, {
-    recursive: true,
-  });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-
-    const filename = `${Date.now()}-${Math.round(
-      Math.random() * 1e9
-    )}${ext}`;
-
-    cb(null, filename);
+// 2. Cấu hình Storage đẩy ảnh thẳng lên Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: async (_req, _file) => {
+    return {
+      folder: "capstone_uploads", // Tên thư mục lưu ảnh trên Cloudinary
+      allowed_formats: ["jpg", "jpeg", "png", "webp", "gif"],
+      public_id: `${Date.now()}-${Math.round(Math.random() * 1e9)}`,
+    };
   },
 });
 
-const fileFilter: multer.Options["fileFilter"] = (
-  req,
-  file,
-  cb
-) => {
-  const allowedTypes = [
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/gif",
-  ];
-
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error("Chỉ cho phép upload file hình ảnh"));
-  }
-};
-
 export const upload = multer({
   storage,
-  fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024,
+    fileSize: 5 * 1024 * 1024, // Giới hạn 5MB
   },
 });
