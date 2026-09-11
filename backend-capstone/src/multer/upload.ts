@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config(); 
+
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
@@ -13,7 +16,8 @@ const storage = new CloudinaryStorage({
   params: {
     folder: "capstone_uploads",
     allowed_formats: ["jpg", "jpeg", "png", "webp", "gif"],
-    public_id: (_req: any, _file: any) => `${Date.now()}-${Math.round(Math.random() * 1e9)}`,
+    public_id: (_req: any, _file: any) =>
+      `${Date.now()}-${Math.round(Math.random() * 1e9)}`,
   } as any,
 });
 

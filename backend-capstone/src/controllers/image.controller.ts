@@ -123,21 +123,22 @@ export const createImage = async (
     const user = (req as any).user;
     const userId = Number(user?.nguoi_dung_id);
 
+    // Bắt lỗi nếu Token chưa được truyền đúng làm userId bị NaN
+    if (isNaN(userId)) {
+      return res.status(401).json({ message: "Xác thực người dùng thất bại" });
+    }
+
     if (!req.file) {
       return res.status(400).json({
-        message: "Vui lòng chọn hình ảnh",
+        message: "Vui lòng chọn hình ảnh hoặc kiểm tra đúng tên field upload (image)",
       });
     }
 
     const { ten_hinh, mo_ta } = req.body;
-
     if (!ten_hinh) {
-      return res.status(400).json({
-        message: "Tên hình không được để trống",
-      });
+      return res.status(400).json({ message: "Tên hình không được để trống" });
     }
 
-    // ✅ Lấy trực tiếp HTTPS URL vĩnh viễn từ Cloudinary
     const imageUrl = (req.file as any).path;
 
     const image = await imageService.createImage(userId, {
