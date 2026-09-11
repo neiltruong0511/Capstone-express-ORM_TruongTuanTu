@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Search,
   Bell,
@@ -24,23 +24,6 @@ export default function Navbar({ onSearch }: NavbarProps) {
   const [openMenu, setOpenMenu] = useState(false);
 
   // =========================
-  // ĐỒNG BỘ USER SAU KHI LOGIN
-  // =========================
-  const [, forceUpdate] = useState(0);
-
-  useEffect(() => {
-    const handleAuthChanged = () => {
-      forceUpdate((prev) => prev + 1);
-    };
-
-    window.addEventListener("authChanged", handleAuthChanged);
-
-    return () => {
-      window.removeEventListener("authChanged", handleAuthChanged);
-    };
-  }, []);
-
-  // =========================
   // SEARCH
   // =========================
   const handleSearch = (e: React.FormEvent) => {
@@ -54,7 +37,7 @@ export default function Navbar({ onSearch }: NavbarProps) {
   // =========================
   const avatar = user?.anh_dai_dien?.trim() || "";
 
-  const avatarLetter = user?.ho_ten?.charAt(0).toUpperCase() || "S";
+  const avatarLetter = user?.ho_ten?.charAt(0).toUpperCase() || "U";
 
   return (
     <header className="navbar">
@@ -64,7 +47,17 @@ export default function Navbar({ onSearch }: NavbarProps) {
       </div>
 
       {/* CREATE */}
-      <div className="navbar-create" onClick={() => navigate("/add")}>
+      <div
+        className="navbar-create"
+        onClick={() => {
+          if (!user) {
+            navigate("/login");
+            return;
+          }
+
+          navigate("/add");
+        }}
+      >
         Tạo
         <ChevronDown size={16} />
       </div>
@@ -82,42 +75,42 @@ export default function Navbar({ onSearch }: NavbarProps) {
 
       {/* ACTIONS */}
       <div className="navbar-actions">
-        {/* NOTIFICATION */}
-        <button type="button">
-          <Bell size={22} />
-          <span className="notification">83</span>
-        </button>
+        {user ? (
+          <>
+            {/* NOTIFICATION */}
+            <button type="button">
+              <Bell size={22} />
+              <span className="notification">83</span>
+            </button>
 
-        {/* MESSAGE */}
-        <button type="button">
-          <MessageCircle size={21} />
-        </button>
+            {/* MESSAGE */}
+            <button type="button">
+              <MessageCircle size={21} />
+            </button>
 
-        {/* PROFILE */}
-        <div className="profile-menu-wrapper">
-          <button
-            type="button"
-            className="avatar-button"
-            onClick={() => setOpenMenu((prev) => !prev)}
-          >
-            {avatar ? (
-              <img
-                src={avatar}
-                alt={user?.ho_ten || "Avatar"}
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                }}
-              />
-            ) : (
-              <span>{avatarLetter}</span>
-            )}
-          </button>
+            {/* PROFILE */}
+            <div className="profile-menu-wrapper">
+              <button
+                type="button"
+                className="avatar-button"
+                onClick={() => setOpenMenu((prev) => !prev)}
+              >
+                {avatar ? (
+                  <img
+                    src={avatar}
+                    alt={user.ho_ten || "Avatar"}
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <span>{avatarLetter}</span>
+                )}
+              </button>
 
-          {/* DROPDOWN */}
-          {openMenu && (
-            <div className="profile-dropdown">
-              {user ? (
-                <>
+              {/* DROPDOWN */}
+              {openMenu && (
+                <div className="profile-dropdown">
                   {/* PROFILE */}
                   <div
                     className="dropdown-user"
@@ -168,35 +161,31 @@ export default function Navbar({ onSearch }: NavbarProps) {
                     <LogOut size={18} />
                     Đăng xuất
                   </div>
-                </>
-              ) : (
-                <>
-                  {/* LOGIN */}
-                  <div
-                    className="dropdown-user"
-                    onClick={() => {
-                      navigate("/login");
-                      setOpenMenu(false);
-                    }}
-                  >
-                    Đăng nhập
-                  </div>
-
-                  {/* REGISTER */}
-                  <div
-                    className="dropdown-user"
-                    onClick={() => {
-                      navigate("/register");
-                      setOpenMenu(false);
-                    }}
-                  >
-                    Đăng ký
-                  </div>
-                </>
+                </div>
               )}
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          <>
+            {/* LOGIN */}
+            <button
+              type="button"
+              className="navbar-login"
+              onClick={() => navigate("/login")}
+            >
+              Đăng nhập
+            </button>
+
+            {/* REGISTER */}
+            <button
+              type="button"
+              className="navbar-register"
+              onClick={() => navigate("/register")}
+            >
+              Đăng ký
+            </button>
+          </>
+        )}
       </div>
     </header>
   );
