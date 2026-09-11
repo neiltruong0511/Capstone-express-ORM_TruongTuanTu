@@ -17,9 +17,10 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://YOUR-FRONTEND.vercel.app", // Thay bằng URL Vercel thật sau khi deploy
+      "http://localhost:3000",
+      "https://capstone-express-orm-truong-tuan-tu.vercel.app",
     ],
-    credentials: true, // Cho phép truyền cookie / Auth header
+    credentials: true,
   })
 );
 
