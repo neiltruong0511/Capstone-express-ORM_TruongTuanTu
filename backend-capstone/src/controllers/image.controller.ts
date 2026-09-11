@@ -144,16 +144,13 @@ export const createImage = async (
       });
     }
 
-    // ✅ Lấy BASE_URL từ biến môi trường (mặc định là localhost nếu ở máy cá nhân)
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
-    
-    // ✅ Nối thành URL hoàn chỉnh có HTTPS/HTTP
-    const fullImageUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    // ✅ CHỈ LƯU ĐƯỜNG DẪN TƯƠNG ĐỐI: Không gắn domain hay localhost vào DB nữa
+    const relativePath = `/uploads/${req.file.filename}`;
 
     const image = await imageService.createImage(userId, {
       ten_hinh,
       mo_ta,
-      duong_dan: fullImageUrl, // Thay đoạn `/uploads/${req.file.filename}` cũ ở đây
+      duong_dan: relativePath, // DB sẽ chỉ lưu dạng: /uploads/1789150842898.jpg
     });
 
     res.status(201).json({
