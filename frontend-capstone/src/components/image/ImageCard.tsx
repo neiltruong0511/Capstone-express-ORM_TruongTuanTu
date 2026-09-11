@@ -5,6 +5,8 @@ interface ImageCardProps {
   image: ImageItem;
 }
 
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+
 const getImageUrl = (url?: string | null) => {
   if (!url) return null;
 
@@ -15,10 +17,10 @@ const getImageUrl = (url?: string | null) => {
 
   // Ảnh upload local từ backend
   if (url.startsWith("/")) {
-    return `http://localhost:3000${url}`;
+    return `${SERVER_URL}${url}`;
   }
 
-  return `http://localhost:3000/${url}`;
+  return `${SERVER_URL}/${url}`;
 };
 
 export default function ImageCard({ image }: ImageCardProps) {
