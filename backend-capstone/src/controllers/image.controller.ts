@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express"; 
 import { AuthRequest } from "../common/middlewares/auth.middleware";
 import * as imageService from "../services/image.service";
+import { uploadToCloudinary } from "../utils/uploadCloudinary";
+
 
 export const getAllImages = async (
   req: Request,
@@ -124,7 +126,9 @@ export const createImage = async (
     const userId = Number(user?.nguoi_dung_id);
 
     if (isNaN(userId)) {
-      return res.status(401).json({ message: "Xác thực người dùng thất bại" });
+      return res.status(401).json({
+        message: "Xác thực người dùng thất bại",
+      });
     }
 
     if (!req.file) {
@@ -141,15 +145,20 @@ export const createImage = async (
       });
     }
 
-    // Tự động lấy protocol + host (Localhost hoặc Render Domain)
-    const protocol = req.protocol;
-    const host = req.get("host");
-    const fullImageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+    // Upload buffer lên Cloudinary
+    const cloudinaryResult = await uploadToCloudinary(
+      req.file.buffer,
+      "pinterest/images"
+    );
 
+    // URL ảnh Cloudinary
+    const imageUrl = cloudinaryResult.secure_url;
+
+    // Lưu URL Cloudinary vào MySQL
     const image = await imageService.createImage(userId, {
       ten_hinh,
       mo_ta,
-      duong_dan: fullImageUrl, // Lưu https://capstone-express-orm-truongtuantu.onrender.com/uploads/...
+      duong_dan: imageUrl,
     });
 
     return res.status(201).json({
