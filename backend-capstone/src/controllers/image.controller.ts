@@ -118,8 +118,7 @@ export const checkSavedImage = async (
 
 export const createImage = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ) => {
   try {
     const user = (req as any).user;
@@ -139,34 +138,52 @@ export const createImage = async (
 
     const { ten_hinh, mo_ta } = req.body;
 
-    if (!ten_hinh) {
+    if (!ten_hinh || !ten_hinh.trim()) {
       return res.status(400).json({
         message: "Tên hình không được để trống",
       });
     }
 
-    // Upload buffer lên Cloudinary
+    // =========================
+    // UPLOAD CLOUDINARY
+    // =========================
+
+    console.log("UPLOAD CLOUDINARY START");
+
     const cloudinaryResult = await uploadToCloudinary(
       req.file.buffer,
       "pinterest/images"
     );
 
-    // URL ảnh Cloudinary
+    console.log("CLOUDINARY RESULT:", cloudinaryResult);
+
     const imageUrl = cloudinaryResult.secure_url;
 
-    // Lưu URL Cloudinary vào MySQL
+    // =========================
+    // SAVE DATABASE
+    // =========================
+
+    console.log("SAVE DATABASE START");
+
     const image = await imageService.createImage(userId, {
-      ten_hinh,
-      mo_ta,
+      ten_hinh: ten_hinh.trim(),
+      mo_ta: mo_ta?.trim() || "",
       duong_dan: imageUrl,
     });
+
+    console.log("DATABASE RESULT:", image);
 
     return res.status(201).json({
       message: "Thêm hình thành công",
       content: image,
     });
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    console.error("CREATE IMAGE ERROR:", error);
+
+    return res.status(500).json({
+      message: "Upload hình ảnh thất bại",
+      error: error?.message || String(error),
+    });
   }
 };
 
